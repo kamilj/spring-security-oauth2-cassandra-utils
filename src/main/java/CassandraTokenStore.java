@@ -159,20 +159,16 @@ public class CassandraTokenStore implements TokenStore {
         }
 
         BoundStatement bs = new BoundStatement(preparedStatementMap.get("insertAccessTokenCql"));
-        try {
-            bs.bind(
-                    extractTokenKey(token.getValue()),
-                    serializeAccessToken(token),
-                    authenticationKeyGenerator.extractKey(authentication),
-                    authentication.isClientOnly() ? null : authentication.getName(),
-                    authentication.getOAuth2Request().getClientId(),
-                    serializeAuthentication(authentication),
-                    extractTokenKey(refreshToken)
-            );
-            session.execute(bs);
-        } catch (CodecNotFoundException e) {
-            e.printStackTrace();
-        }
+        bs.bind(
+                extractTokenKey(token.getValue()),
+                serializeAccessToken(token),
+                authenticationKeyGenerator.extractKey(authentication),
+                authentication.isClientOnly() ? null : authentication.getName(),
+                authentication.getOAuth2Request().getClientId(),
+                serializeAuthentication(authentication),
+                extractTokenKey(refreshToken)
+        );
+        session.execute(bs);
     }
 
     @Override
