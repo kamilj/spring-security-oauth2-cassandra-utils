@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 public class CassandraTokenStoreTestIntegration extends TokenStoreBaseTests {
 
     private Logger LOG = LoggerFactory.getLogger(CassandraTokenStoreTestIntegration.class);
-    private String testKeyspace = "token_store_test";
+    private String testKeyspace = "oauth_test";
 
     private Cluster cluster;
     private Session session;
@@ -79,7 +79,7 @@ public class CassandraTokenStoreTestIntegration extends TokenStoreBaseTests {
 
     private void setUpKeyspaceAndTables(Cluster cluster) throws IOException {
         Session session = cluster.connect();
-        String[] schemaCommands = getSchema("/token_store_test.cql").split(";");
+        String[] schemaCommands = getSchema("/oauth_test.cql").split(";");
 
         for (int i = 0; i < schemaCommands.length - 1; ++i) {
 
