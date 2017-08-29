@@ -47,11 +47,20 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         CassandraClientDetailsServiceBuilder builder = new CassandraClientDetailsServiceBuilder();
-        builder.session(session())
+        builder
+                .session(session())
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .withClient("web_app")
-		        .scopes("ui")
-		        .authorizedGrantTypes("refresh_token", "password")
-                .and().build();
+                    .scopes("ui")
+                    .secret("secret")
+                    .authorizedGrantTypes("refresh_token", "password")
+                .and()
+                .withClient("service")
+                    .scopes("service")
+                    .secret("secret")
+                    .authorizedGrantTypes("client_credentials", "refresh_token", "sdis_service")
+                .and()
+                .build();
         clients.configure(builder);
 
     }
@@ -61,7 +70,14 @@ public class OAuth2AuthorizationConfig extends AuthorizationServerConfigurerAdap
         endpoints
                 .tokenStore(tokenStore)
                 .userDetailsService(userDetailsService)
-                .authenticationManager(authenticationManager);
+                .authenticationManager(authenticationManager)
+                .tokenGranter(tokenGranter(endpoints));
+    }
+
+    private TokenGranter tokenGranter(final AuthorizationServerEndpointsConfigurer endpoints) {
+        List<TokenGranter> granters = new ArrayList<TokenGranter>(Arrays.asList(endpoints.getTokenGranter()));
+        granters.add(new ServiceTokenGranter(endpoints.getTokenServices(), endpoints.getClientDetailsService(), endpoints.getOAuth2RequestFactory()));
+        return new CompositeTokenGranter(granters);
     }
 
     @Bean
